@@ -9,6 +9,7 @@ class GameStats():
         self.high_score = 0
         self.level = 1
         self.score = 0
+        self.lives = settings["player_lives"]
 
 
     def reset(self, settings):

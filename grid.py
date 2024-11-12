@@ -12,8 +12,11 @@ class Grid():
         self.x_start = 20
         self.y_start = 100
         self.size = self.findGridSize(settings)
-        self.filled = [["" for i in range(self.grid_nb[0])] for j in range(self.grid_nb[1])]
+        self.filled = [[Square(j,i) for i in range(self.grid_nb[0])] for j in range(self.grid_nb[1])]
         self.rect = pygame.Rect(self.x_start, self.y_start, self.size*self.grid_nb[0], self.size*self.grid_nb[1])
+        
+        self.monsters = {}
+        self.obstacles = []
   
     def findGridSize(self, settings):
         "Calculate grid size for the game"
@@ -24,7 +27,6 @@ class Grid():
 
         if size[0]>size[1]: return size[1]
         else: return size[0]
-   
 
                      
     def drawGrid(self, screen):
@@ -33,8 +35,8 @@ class Grid():
             
         for y, ligne in enumerate(self.filled):
             for x, filling in enumerate(ligne):
-                if filling != "" :
-                    filling.draw_self(screen, self, x, y)
+                if not filling.is_empty():
+                    filling.inside.draw_self(screen, self, x, y)
                 
                 rect = pygame.Rect(x*self.size+self.x_start, 
                                     y*self.size+self.y_start, 
@@ -46,7 +48,18 @@ class Grid():
         """Check if the move target is allowed"""
         max_x = self.grid_nb[1]-1
         max_y = self.grid_nb[0]-1
-            
+ 
+class Square:
+    def __init__(self, x, y, inside = ""):
+        self.x = x
+        self.y = y
+        self.inside = ""
+        
+    def is_empty(self):
+        """Check what's inside the square"""
+        if self.inside != "":
+            return 0
+        return 1                   
                     
     # def updatePosition(self, player):
 if __name__ == "__name__":

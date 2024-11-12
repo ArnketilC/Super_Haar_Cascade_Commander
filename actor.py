@@ -20,7 +20,7 @@ class Entity():
         self.name = name
         self.position = init_position
         
-        grid.filled[init_position[1]][init_position[0]] = self
+        grid.filled[init_position[1]][init_position[0]].inside = self
         self.image = pygame.image.load(path.join(sys.path[0], f"resources/{image}"))
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
@@ -35,13 +35,13 @@ class Obstacle(Entity):
     def __init__(self, grid, name, init_position, image):
         "Init an actor character"
         super().__init__(grid, name, init_position, image)
-
-class Bush(Entity):
+        self.object_type = "Obstacle"
+class Bush(Obstacle):
     def __init__(self, grid, name, init_position):
         "Init an actor character"
         super().__init__(grid, name, init_position, "bushes.png")
 
-class Rock(Entity):
+class Rock(Obstacle):
     def __init__(self, grid, name, init_position):
         "Init an actor character"
         super().__init__(grid, name, init_position, "rocks.png")         
@@ -58,40 +58,37 @@ class Actor(Entity):
         
         match key:
             case "up":
-                if 0 < self.position[1] and grid.filled[self.position[1] -1][self.position[0]] == "": 
-                    grid.filled[self.position[1]][self.position[0]] = ""
+                if 0 < self.position[1] and grid.filled[self.position[1] -1][self.position[0]].inside == "": 
+                    grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[1] -= 1
                     print(f"{self.name} moved up")
             case "down":
-                if max_x> self.position[1] and grid.filled[self.position[1] +1][self.position[0]] == "": 
-                    grid.filled[self.position[1]][self.position[0]] = ""
+                if max_x> self.position[1] and grid.filled[self.position[1] +1][self.position[0]].inside == "": 
+                    grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[1] += 1
                     print(f"{self.name} moved down")
             case "left":
-                if 0 < self.position[0] and grid.filled[self.position[1]][self.position[0]-1] == "": 
-                    grid.filled[self.position[1]][self.position[0]] = ""
+                if 0 < self.position[0] and grid.filled[self.position[1]][self.position[0]-1].inside == "": 
+                    grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[0] -= 1
                     print(f"{self.name} moved left")
             case "right":
-                if max_y > self.position[0] and grid.filled[self.position[1]][self.position[0]+1] == "": 
-                    grid.filled[self.position[1]][self.position[0]] = ""
+                if max_y > self.position[0] and grid.filled[self.position[1]][self.position[0]+1].inside == "": 
+                    grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[0] += 1
                     print(f"{self.name} moved right")
+            case "attack":
+                self.attack(grid)
             case _:
                 pass
 
-    def attack(self):
-        """Attacking method for all actors"""
-        pass
-    
     def action(self, grid):
         """Do the queues actions"""
-        try : 
-            self.move(self.action_queue.pop(0), grid)
-        except:
-            pass
         if len(self.action_queue) == 0:
             return TURN_ORDER[self.order+1]
+        
+        self.move(self.action_queue.pop(0), grid)
+        
         return TURN_ORDER[self.order]
     
 
@@ -102,7 +99,7 @@ class Player(Actor):
         init_position = [0,0]
         super().__init__(grid, name, init_position, "player.png")
         self.action_queue = []
-        self.type = "player"
+        self.object_type = "player"
         self.order = 0
         
     def queue_action(self, action):
@@ -114,12 +111,25 @@ class Player(Actor):
     def move(self, key, grid):
         """Move the player"""
         super().move(key, grid)
-        grid.filled[self.position[1]][self.position[0]] = self
+        grid.filled[self.position[1]][self.position[0]].inside = self
         
-    def attack(self, monster):
+    def attack(self, grid):
         """Attack method to deal with enemy"""
-        pass
-    
+
+        for i in range(-1,2,2):
+            target = grid.filled[self.position[1]+i][self.position[0]]
+            if not target.is_empty():
+                if target.inside.object_type  == "monster":
+                    print("MonsterFound !")
+                    target.inside.killed(grid)
+                    break
+            target = grid.filled[self.position[1]][self.position[0]+i]
+            if not target.is_empty():
+                if target.inside.object_type  == "monster":
+                    print("MonsterFound !")
+                    target.inside.killed(grid)
+                    break
+        
     def guard(self, monster):
         """Guard one attack comming from a monster"""
         pass
@@ -131,28 +141,42 @@ class Monster(Actor):
     def __init__(self, grid, name, init_position, image):
         """Init the player character"""
         super().__init__(grid, name, init_position, image)
-        self.type = "monster"
+        self.object_type = "monster"
         self.order = 1
+        self.id
         
     def move(self, int_direct, grid):
         """Move the monster"""
         key = QUARDINAL[int_direct]
         super().move(key, grid)
-        grid.filled[self.position[1]][self.position[0]] = self
+        grid.filled[self.position[1]][self.position[0]].inside = self
         
+    def killed(self, grid):
+        grid.filled[self.position[1]][self.position[0]].inside = ""
+        grid.monsters.pop(self.id)
         
 class Warrior(Monster):
     def __init__(self, grid, id, init_position):
         """Init the warrior ennemy type"""
-        name = f"Warrior: id{id}"
+        self.id = id        
+        name = f"Warrior: id{self.id}"
         super().__init__(grid, name, init_position, "warrior.png")
+
 
 class Archer(Monster):
     def __init__(self, grid, id, init_position):
         """Init the warrior ennemy type"""
-        name = f"Archer: id{id}"
+        self.id = id
+        name = f"Archer: id{self.id}"
         super().__init__(grid, name, init_position, "archer.png")
-  
+
+from pygame.sprite import Sprite
+class Heart(Sprite):
+    def __init__(self):
+        super(Heart, self).__init__()
+        self.image = pygame.image.load(path.join(sys.path[0], f"resources/heart.png"))
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect()
         
 if __name__ == "__name__":
     pass

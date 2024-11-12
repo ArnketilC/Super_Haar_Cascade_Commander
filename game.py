@@ -43,30 +43,27 @@ def run():
     running = True   
     turn_status = ""
 
-    monsters = []
-    obstacles = []
-    current_action = 0
-    
+
     for i in range(randrange(10)+1):
-        monsters.append(Archer(game_grid, i+1, 
-                          [randrange(settings["grid_nb"][0]),   
-                           randrange(settings["grid_nb"][1])]
+        game_grid.monsters[f"a{i+1}"] = (Archer(game_grid, f"a{i+1}", 
+                                    [randrange(settings["grid_nb"][0]),
+                                    randrange(settings["grid_nb"][1])]
         ))
 
     for i in range(randrange(10)+1):
-        monsters.append(Warrior(game_grid, i+1, 
+        game_grid.monsters[f"w{i+1}"] = (Warrior(game_grid, f"w{i+1}", 
+                                    [randrange(settings["grid_nb"][0]),
+                                    randrange(settings["grid_nb"][1])]
+        ))
+        
+    for i in range(randrange(10)+1):
+        game_grid.obstacles.append(Bush(game_grid, i+1, 
                           [randrange(settings["grid_nb"][0]),
                            randrange(settings["grid_nb"][1])]
         ))
         
     for i in range(randrange(10)+1):
-        obstacles.append(Bush(game_grid, i+1, 
-                          [randrange(settings["grid_nb"][0]),
-                           randrange(settings["grid_nb"][1])]
-        ))
-        
-    for i in range(randrange(10)+1):
-        obstacles.append(Rock(game_grid, i+1, 
+        game_grid.obstacles.append(Rock(game_grid, i+1, 
                           [randrange(settings["grid_nb"][0]),
                            randrange(settings["grid_nb"][1])]
         ))
@@ -93,11 +90,9 @@ def run():
                 
         match turn_status:
             case "player":
-                    player.action(game_grid)
-                    if len(player.action_queue) == 0:
-                        turn_status = "monster"
+                    turn_status = player.action(game_grid)
             case "monster":
-                    for monster in monsters:
+                    for monster in game_grid.monsters.values():
                         monster.move(randrange(4), game_grid)
                     turn_status = ""
             case _:
@@ -107,7 +102,7 @@ def run():
         keys = pygame.key.get_pressed()
         check_key_strokes(keys, player, game_grid)
 
-        update_screen(screen, game_grid, sb, count_down, player, monsters)
+        update_screen(screen, game_grid, sb, count_down, player, game_grid.monsters)
 
         # Exit the game using q
         if keys[pygame.K_q]:

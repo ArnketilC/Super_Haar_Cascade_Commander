@@ -1,6 +1,8 @@
 import pygame
 import pygame.font
 
+from actor import Heart
+
 def check_key_strokes(keys, player, grid):
     """Check for specific keys strokes""" 
     if keys[pygame.K_UP]:
@@ -11,6 +13,8 @@ def check_key_strokes(keys, player, grid):
         player.queue_action("left")
     if keys[pygame.K_RIGHT]:
         player.queue_action("right") 
+    if keys[pygame.K_SPACE]:
+        player.queue_action("attack") 
 
 def update_screen(screen, grid, sb, countDown, player, monster):
     """Update screen."""
@@ -69,7 +73,6 @@ class CountDown:
 import pygame.font
 import pygame.sprite
 
-
 class Scoreboard():
     """Create a scoreboard class."""
     
@@ -85,6 +88,7 @@ class Scoreboard():
         self.prop_score()
         self.prop_high_score()
         self.prop_level()
+        self.prop_payer_life()
         
     def prop_score(self):
         """Prop scorboard text."""
@@ -92,7 +96,7 @@ class Scoreboard():
         self.score_as_image = self.font.render(str_score, True, self.txt_color, self.settings["screen_color"])
         self.score_rect = self.score_as_image.get_rect()
         self.score_rect.right = self.screen_rect.right - 20
-        self.score_rect.top = 20
+        self.score_rect.top = 10
 
     def prop_high_score(self):
         """Prop scorboard  high score text."""
@@ -100,8 +104,8 @@ class Scoreboard():
         str_high_score = "High Score : {:,}".format(high_score)
         self.high_as_image = self.font.render(str_high_score, True, self.txt_color, self.settings["screen_color"])
         self.high_score_rect = self.high_as_image.get_rect()
-        self.high_score_rect.left = self.screen_rect.left
-        self.high_score_rect.top = self.score_rect.top
+        self.high_score_rect.right = self.score_rect.right
+        self.high_score_rect.top = self.score_rect.bottom
 
     def prop_level(self):
         """Prop scorboard level text."""
@@ -109,11 +113,21 @@ class Scoreboard():
         self.level_as_image = self.font.render(str_level, True, self.txt_color, self.settings["screen_color"])
         self.level_rect = self.level_as_image.get_rect()
         self.level_rect.right = self.score_rect.right
-        self.level_rect.top = self.score_rect.bottom
+        self.level_rect.top = self.high_score_rect.bottom
+
+    def prop_payer_life(self):
+        """Prop ships left until death."""
+        self.lives = pygame.sprite.Group()
+        for live in range(self.stats.lives):
+            heart = Heart()
+            heart.rect.x = 10 + live * heart.rect.width
+            heart.rect.y = 10
+            self.lives.add(heart)
 
     def show(self):
         """Draw score screen."""
         self.screen.blit(self.score_as_image, self.score_rect)
         self.screen.blit(self.high_as_image, self.high_score_rect)
         self.screen.blit(self.level_as_image, self.level_rect)
+        self.lives.draw(self.screen)
 
