@@ -3,7 +3,7 @@ import sys
 import json
 from os import path
 from grid import Grid
-from actor import Player
+from actor import Player, Monster
 
 
 
@@ -22,6 +22,9 @@ def setup():
     # Set the screen to game resolution.
     screen = pygame.display.set_mode((tuple(settings["resolution"]))  )#, pygame.FULLSCREEN)
     
+    # Change title
+    pygame.display.set_caption("Super Haar Cascade Commander !")
+    
     # Set gride size
     game_grid = Grid(settings)
 
@@ -29,28 +32,28 @@ def setup():
 def run():
     """Main loop of the game"""
     running = True
-    player = Player() # Init the player
-
+    player = Player(game_grid) # Init the player
+    monster = Monster(game_grid, "id1", (20,10))
     while running:
         screen.fill(settings['screen_color'])
-        game_grid.drawGrid(screen, pygame)
+        game_grid.drawGrid(screen, pygame, player)
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        game_grid.drawPlayer(screen, pygame, player)
+        # game_grid.drawPlayer(screen, pygame, player)
  
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            player.move("up", game_grid.grid_nb[1])
+            player.move("up", game_grid)
         if keys[pygame.K_DOWN]:
-            player.move("down", game_grid.grid_nb[1])
+            player.move("down", game_grid)
         if keys[pygame.K_LEFT]:
-            player.move("left", game_grid.grid_nb[0])
+            player.move("left", game_grid)
         if keys[pygame.K_RIGHT]:
-            player.move("right", game_grid.grid_nb[0])
+            player.move("right", game_grid)
 
         pygame.display.update()
 
