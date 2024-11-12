@@ -3,7 +3,7 @@ import sys
 import json
 from os import path
 from grid import Grid
-from actor import Player, Monster
+from actor import Player, Warrior, Archer, Rock, Bush
 from stats import GameStats
 from game_fonction import update_screen, check_key_strokes, CountDown, Scoreboard
 from random import randrange
@@ -11,7 +11,6 @@ from random import randrange
 def setup():
     "Set the game up"
     global screen, settings, game_grid, player, sb, count_down
-    """Main loop."""
     # Initialise pygame
     pygame.init()
 
@@ -32,7 +31,6 @@ def setup():
     # Create the player and position    
     player = Player(game_grid) # Init the player
 
-
     # Create sructure for current game stats
     stats = GameStats(settings)
     # Create a scoreboard
@@ -41,20 +39,43 @@ def setup():
     count_down = CountDown(settings, screen)
 
 def run():
-    """Main loop of the game"""
+    """Main function to launch the game"""
     running = True   
+    turn_status = ""
 
     monsters = []
-    for i in range(randrange(10)+3):
-        monsters.append(Monster(game_grid, f"id={i+1}", 
+    obstacles = []
+    current_action = 0
+    
+    for i in range(randrange(10)+1):
+        monsters.append(Archer(game_grid, i+1, 
+                          [randrange(settings["grid_nb"][0]),   
+                           randrange(settings["grid_nb"][1])]
+        ))
+
+    for i in range(randrange(10)+1):
+        monsters.append(Warrior(game_grid, i+1, 
                           [randrange(settings["grid_nb"][0]),
                            randrange(settings["grid_nb"][1])]
         ))
-    
+        
+    for i in range(randrange(10)+1):
+        obstacles.append(Bush(game_grid, i+1, 
+                          [randrange(settings["grid_nb"][0]),
+                           randrange(settings["grid_nb"][1])]
+        ))
+        
+    for i in range(randrange(10)+1):
+        obstacles.append(Rock(game_grid, i+1, 
+                          [randrange(settings["grid_nb"][0]),
+                           randrange(settings["grid_nb"][1])]
+        ))
+
     TIMEREVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(TIMEREVENT, 1000) 
     
     while running:
+        """Main loop of the game"""
         
         pygame.time.delay(100) # Small delay 
     
@@ -67,17 +88,26 @@ def run():
                 running = False
             # Else we update the timer
             elif event.type == TIMEREVENT:
-                end_turn = count_down.up_date()
-        
-                if end_turn:
+                if count_down.up_date():
+                    turn_status = "player"
+                
+        match turn_status:
+            case "player":
+                    player.action(game_grid)
+                    if len(player.action_queue) == 0:
+                        turn_status = "monster"
+            case "monster":
                     for monster in monsters:
                         monster.move(randrange(4), game_grid)
+                    turn_status = ""
+            case _:
+                pass
 
  
         keys = pygame.key.get_pressed()
         check_key_strokes(keys, player, game_grid)
 
-        update_screen(screen, game_grid, sb, count_down, player, monsters[0])
+        update_screen(screen, game_grid, sb, count_down, player, monsters)
 
         # Exit the game using q
         if keys[pygame.K_q]:

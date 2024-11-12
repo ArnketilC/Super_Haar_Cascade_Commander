@@ -4,26 +4,22 @@ import pygame.font
 def check_key_strokes(keys, player, grid):
     """Check for specific keys strokes""" 
     if keys[pygame.K_UP]:
-        player.move("up", grid)
+        player.queue_action("up")
     if keys[pygame.K_DOWN]:
-        player.move("down", grid)
+        player.queue_action("down")
     if keys[pygame.K_LEFT]:
-        player.move("left", grid)
+        player.queue_action("left")
     if keys[pygame.K_RIGHT]:
-        player.move("right", grid)
-        
+        player.queue_action("right") 
 
 def update_screen(screen, grid, sb, countDown, player, monster):
     """Update screen."""
     # Show score board
-    sb.show()
-    
+    sb.show()    
     # Count down
-    countDown.show()
-    
+    countDown.show()   
     # Draw the grid
-    grid.drawGrid(screen, player, monster)
-        
+    grid.drawGrid(screen)    
     # Update en fonction des des demandes
     pygame.display.update()
 
@@ -60,8 +56,6 @@ class CountDown:
         str_count_down = str(self.value)
         self.count_down_as_image = self.font.render(str_count_down, True, self.txt_color, self.settings["screen_color"])
         self.count_down_rect = self.count_down_as_image.get_rect()
-        # self.count_down_rect.right = self.screen_rect.right - 20
-        # self.count_down_rect.top = 50
         self.count_down_rect.right = self.screen_rect.centerx
         self.count_down_rect.top = self.count_down_rect.top
 
@@ -74,7 +68,6 @@ class CountDown:
 
 import pygame.font
 import pygame.sprite
-
 
 
 class Scoreboard():

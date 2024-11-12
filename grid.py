@@ -2,7 +2,7 @@ import pygame
 
 GREEN = (10, 90, 10)
 BLACK = (0, 0, 0)
-GRID_WIDTH = 3
+GRID_WIDTH = 1
 
 
 class Grid():
@@ -27,36 +27,25 @@ class Grid():
    
 
                      
-    def drawGrid(self, screen, player, monster):
+    def drawGrid(self, screen):
         """Draw the grid in pygame"""
         pygame.draw.rect(screen, GREEN, self.rect)
+            
         for y, ligne in enumerate(self.filled):
             for x, filling in enumerate(ligne):
-                match filling:
-                    case "":
-                        pass
-                    case "p":
-                        screen.blit(player.image, pygame.Rect(x*self.size+self.x_start+GRID_WIDTH, 
-                                        y*self.size+self.y_start+GRID_WIDTH, 
-                                        self.size, 
-                                        self.size))
-                    case "m":
-                        screen.blit(monster.image, pygame.Rect(x*self.size+self.x_start+GRID_WIDTH, 
-                                        y*self.size+self.y_start+3, 
-                                        self.size, 
-                                        self.size)) 
-                    case _:
-                        pass
+                if filling != "" :
+                    filling.draw_self(screen, self, x, y)
+                
                 rect = pygame.Rect(x*self.size+self.x_start, 
                                     y*self.size+self.y_start, 
                                     self.size, 
                                     self.size)
                 pygame.draw.rect(screen, BLACK, rect, GRID_WIDTH)  
 
-        def isAllowed(self, target):
-            """Check if the move target is allowed"""
-            max_x = self.grid_nb[1]-1
-            max_y = self.grid_nb[0]-1
+    def isAllowed(self, target):
+        """Check if the move target is allowed"""
+        max_x = self.grid_nb[1]-1
+        max_y = self.grid_nb[0]-1
             
                     
     # def updatePosition(self, player):

@@ -1,5 +1,3 @@
-"""Setting during the game."""
-
 
 class GameStats():
     """Stats during the game."""

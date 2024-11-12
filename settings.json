@@ -2,6 +2,7 @@
     "resolution": [1024, 768],
     "screen_color": [0, 0, 0],
     "grid_nb": [16, 10],
-    "default_count_down": 7
+    "default_count_down": 5,
+    "player_lives": 3
 }
 
