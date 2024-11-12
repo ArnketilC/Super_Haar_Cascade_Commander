@@ -13,7 +13,7 @@ def check_key_strokes(keys, player, grid):
         player.move("right", grid)
         
 
-def update_screen(screen, grid, sb, countDown):
+def update_screen(screen, grid, sb, countDown, player, monster):
     """Update screen."""
     # Show score board
     sb.show()
@@ -22,7 +22,7 @@ def update_screen(screen, grid, sb, countDown):
     countDown.show()
     
     # Draw the grid
-    grid.drawGrid(screen, pygame)
+    grid.drawGrid(screen, player, monster)
         
     # Update en fonction des des demandes
     pygame.display.update()
@@ -52,7 +52,8 @@ class CountDown:
         if self.value == 0:
             print('Time\'s up!')
             self.value = self.settings["default_count_down"]
-        # self.show()
+            return 1
+        return 0;
             
     def prop_countdown(self):
         """Prop scorboard text."""

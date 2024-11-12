@@ -1,9 +1,13 @@
+import pygame
+import sys
+from os import path
+
 class Actor():
     def __init__(self, name, init_position):
         "Init an actor character"
         self.name = name
         self.position = init_position
-        print(type(init_position))
+        # self.screen = screen
         
     def move(self, key, grid):
         """Handle movements"""
@@ -39,6 +43,10 @@ class Player(Actor):
         """Init the player character"""
         super().__init__(name, init_position=[0, 0])
         grid.filled[0][0] = "p"
+        self.image = pygame.image.load(path.join(sys.path[0], "resources/player.png"))
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect()
+
         
     def move(self, key, grid):
         """Move the player"""
@@ -57,6 +65,9 @@ class Monster(Actor):
         """Init the player character"""
         super().__init__(name, init_position)
         grid.filled[init_position[1]][init_position[0]] = "m"
+        self.image = pygame.image.load(path.join(sys.path[0], "resources/warrior.png"))
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect()
         
     def move(self, int_direct, grid):
         """Move the monster"""

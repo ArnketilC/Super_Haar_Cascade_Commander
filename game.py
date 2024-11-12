@@ -53,13 +53,11 @@ def run():
     
     TIMEREVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(TIMEREVENT, 1000) 
-
     
     while running:
         
         pygame.time.delay(100) # Small delay 
-        
-        
+    
         screen.fill(settings['screen_color'])
 
         # poll for events
@@ -69,15 +67,17 @@ def run():
                 running = False
             # Else we update the timer
             elif event.type == TIMEREVENT:
-                count_down.up_date()
-                for monster in monsters:
-                    monster.move(randrange(4), game_grid)
+                end_turn = count_down.up_date()
+        
+                if end_turn:
+                    for monster in monsters:
+                        monster.move(randrange(4), game_grid)
 
  
         keys = pygame.key.get_pressed()
         check_key_strokes(keys, player, game_grid)
 
-        update_screen(screen, game_grid, sb, count_down)
+        update_screen(screen, game_grid, sb, count_down, player, monsters[0])
 
         # Exit the game using q
         if keys[pygame.K_q]:
