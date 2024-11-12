@@ -3,6 +3,7 @@ class Actor():
         "Init an actor character"
         self.name = name
         self.position = init_position
+        print(type(init_position))
         
     def move(self, key, grid):
         """Handle movements"""
@@ -40,17 +41,26 @@ class Player(Actor):
         grid.filled[0][0] = "p"
         
     def move(self, key, grid):
+        """Move the player"""
         super().move(key, grid)
         grid.filled[self.position[1]][self.position[0]] = "p"
         
-        
+
+QUARDINAL={
+    0:"up",
+    1:"down",
+    2:"left",
+    3:"right"
+}
 class Monster(Actor):
     def __init__(self, grid, name, init_position):
         """Init the player character"""
         super().__init__(name, init_position)
         grid.filled[init_position[1]][init_position[0]] = "m"
         
-    def move(self, key, grid):
+    def move(self, int_direct, grid):
+        """Move the monster"""
+        key = QUARDINAL[int_direct]
         super().move(key, grid)
         grid.filled[self.position[1]][self.position[0]] = "m"
         

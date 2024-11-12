@@ -6,7 +6,7 @@ from grid import Grid
 from actor import Player, Monster
 from stats import GameStats
 from game_fonction import update_screen, check_key_strokes, CountDown, Scoreboard
-
+from random import randrange
 
 def setup():
     "Set the game up"
@@ -44,8 +44,12 @@ def run():
     """Main loop of the game"""
     running = True   
 
-
-    monster = Monster(game_grid, "id1", (20,10))
+    monsters = []
+    for i in range(randrange(10)+3):
+        monsters.append(Monster(game_grid, f"id={i+1}", 
+                          [randrange(settings["grid_nb"][0]),
+                           randrange(settings["grid_nb"][1])]
+        ))
     
     TIMEREVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(TIMEREVENT, 1000) 
@@ -66,6 +70,8 @@ def run():
             # Else we update the timer
             elif event.type == TIMEREVENT:
                 count_down.up_date()
+                for monster in monsters:
+                    monster.move(randrange(4), game_grid)
 
  
         keys = pygame.key.get_pressed()
