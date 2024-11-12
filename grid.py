@@ -6,7 +6,7 @@ class Grid():
     def __init__(self, settings):
         self.grid_nb = settings["grid_nb"] #     "grid_nb": [30, 20]
         self.x_start = 20
-        self.y_start = 50
+        self.y_start = 100
         self.size = self.findGridSize(settings)
         self.filled = [["" for i in range(self.grid_nb[0])] for j in range(self.grid_nb[1])]
   
@@ -21,7 +21,7 @@ class Grid():
         else: return size[0]
    
                      
-    def drawGrid(self, screen, pygame, player):
+    def drawGrid(self, screen, pygame):
         """Draw the grid in pygame"""
         
         for y, ligne in enumerate(self.filled):
@@ -41,7 +41,7 @@ class Grid():
                                             self.size/3)                       
                     case "m":
                         pygame.draw.circle(screen, 
-                                            "red",
+                                            "green",
                                             (x*self.size+self.size/2+self.x_start, 
                                             y*self.size+self.size/2+self.y_start), 
                                             self.size/3)     

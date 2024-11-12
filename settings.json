@@ -1,6 +1,7 @@
 {
     "resolution": [1024, 768],
     "screen_color": [0, 0, 0],
-    "grid_nb": [30, 20]
+    "grid_nb": [24, 16],
+    "default_count_down": 7
 }
 
