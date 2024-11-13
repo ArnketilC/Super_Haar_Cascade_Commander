@@ -10,6 +10,7 @@ class GameStats():
         self.level = 1
         self.score = 0
         self.lives = settings["player_lives"]
+        self.turn_status = "timer"
 
 
     def reset(self, settings):

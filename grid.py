@@ -53,7 +53,7 @@ class Square:
     def __init__(self, x, y, inside = ""):
         self.x = x
         self.y = y
-        self.inside = ""
+        self.inside = inside
         
     def is_empty(self):
         """Check what's inside the square"""

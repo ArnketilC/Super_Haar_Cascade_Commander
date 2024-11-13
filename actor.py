@@ -11,8 +11,6 @@ QUARDINAL={
     3:"right"
 }
 
-TURN_ORDER=["player", "monster", "next"]
-    
 
 class Entity():    
     def __init__(self, grid,  name, init_position, image):
@@ -50,110 +48,182 @@ class Actor(Entity):
     def __init__(self, grid, name, init_position, image):
         "Init an actor character"
         super().__init__(grid, name, init_position, image)
+        self.action_queue = []
         
     def move(self, key, grid):
         """Handle movements"""
         max_x = grid.grid_nb[1]-1
         max_y = grid.grid_nb[0]-1
         
-        match key:
-            case "up":
+        # GODDAMMM PYTHON 3.9        
+        # match key:
+        #     case "up":
+        #         if 0 < self.position[1] and grid.filled[self.position[1] -1][self.position[0]].inside == "": 
+        #             grid.filled[self.position[1]][self.position[0]].inside = ""
+        #             self.position[1] -= 1
+        #             print(f"{self.name} moved up")
+        #     case "down":
+        #         if max_x> self.position[1] and grid.filled[self.position[1] +1][self.position[0]].inside == "": 
+        #             grid.filled[self.position[1]][self.position[0]].inside = ""
+        #             self.position[1] += 1
+        #             print(f"{self.name} moved down")
+        #     case "left":
+        #         if 0 < self.position[0] and grid.filled[self.position[1]][self.position[0]-1].inside == "": 
+        #             grid.filled[self.position[1]][self.position[0]].inside = ""
+        #             self.position[0] -= 1
+        #             print(f"{self.name} moved left")
+        #     case "right":
+        #         if max_y > self.position[0] and grid.filled[self.position[1]][self.position[0]+1].inside == "": 
+        #             grid.filled[self.position[1]][self.position[0]].inside = ""
+        #             self.position[0] += 1
+        #             print(f"{self.name} moved right")
+        #     case "attack":
+        #         score = self.attack(grid, self.target)
+        #         try:
+        #             self.score_update(score)
+        #         except:
+        #             pass
+        #     case _:
+        #         pass
+
+       # match key:
+        if key == "up":
                 if 0 < self.position[1] and grid.filled[self.position[1] -1][self.position[0]].inside == "": 
                     grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[1] -= 1
                     print(f"{self.name} moved up")
-            case "down":
+        elif key == "down":
                 if max_x> self.position[1] and grid.filled[self.position[1] +1][self.position[0]].inside == "": 
                     grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[1] += 1
                     print(f"{self.name} moved down")
-            case "left":
+        elif key == "left":
                 if 0 < self.position[0] and grid.filled[self.position[1]][self.position[0]-1].inside == "": 
                     grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[0] -= 1
                     print(f"{self.name} moved left")
-            case "right":
+        elif key =="right":
                 if max_y > self.position[0] and grid.filled[self.position[1]][self.position[0]+1].inside == "": 
                     grid.filled[self.position[1]][self.position[0]].inside = ""
                     self.position[0] += 1
                     print(f"{self.name} moved right")
-            case "attack":
-                self.attack(grid)
-            case _:
+        elif key =="attack":
+                score = self.attack(grid, self.target)
+                try:
+                    self.score_update(score)
+                except:
+                    pass
+
+        
+
+    def attack(self, grid, target_name):
+        """Attack method to deal with enemy"""
+        score = 0
+        for i in range(-1,2,2):
+            try:
+                target = grid.filled[self.position[1]+i][self.position[0]]
+                if not target.is_empty():
+                    if target.inside.object_type  == target_name:
+                        print(f"{self.name} is attacking:{target_name}")
+                        score += target.inside.hit(grid)
+            except:
                 pass
-
-    def action(self, grid):
-        """Do the queues actions"""
-        if len(self.action_queue) == 0:
-            return TURN_ORDER[self.order+1]
-        
-        self.move(self.action_queue.pop(0), grid)
-        
-        return TURN_ORDER[self.order]
-    
-
-
-class Player(Actor):
-    def __init__(self, grid, name="Player"):
-        """Init the player character"""
-        init_position = [0,0]
-        super().__init__(grid, name, init_position, "player.png")
-        self.action_queue = []
-        self.object_type = "player"
-        self.order = 0
-        
+            try:
+                target = grid.filled[self.position[1]][self.position[0]+i]
+                if not target.is_empty():
+                    if target.inside.object_type  == target_name:
+                        print(f"{self.name} is attacking: {target_name}")
+                        score += target.inside.hit(grid)
+            except:
+                pass  
+        return score 
+            
+            
     def queue_action(self, action):
         """Queue action for the player"""
         if len(self.action_queue)<4:
             self.action_queue.append(action)
             print(f"Action queue : {action}")
+
+
+    def action(self, grid):
+        """Do the queues actions"""
+        while(len(self.action_queue)>0):
+            # print(self.action_queue)
+            self.move(self.action_queue.pop(0), grid)   
+
+class Player(Actor):
+    def __init__(self, grid, stats, sb, name="player"):
+        """Init the player character"""
+        init_position = [0,0]
+        super().__init__(grid, name, init_position, "player.png")
+        self.object_type = "player"
+        self.stats = stats
+        self.sb = sb
+        self.target = "monster"
+        self.invincibility = False
         
+
     def move(self, key, grid):
         """Move the player"""
         super().move(key, grid)
         grid.filled[self.position[1]][self.position[0]].inside = self
         
-    def attack(self, grid):
-        """Attack method to deal with enemy"""
+    def hit(self, grid):
+        """Player is hit"""
+        if self.invincibility == False:
+            self.stats.lives -= 1
+            self.sb.prop_player_life()
+            print("player got hit")
+        else :
+            print("player dodge the second attack")
 
-        for i in range(-1,2,2):
-            target = grid.filled[self.position[1]+i][self.position[0]]
-            if not target.is_empty():
-                if target.inside.object_type  == "monster":
-                    print("MonsterFound !")
-                    target.inside.killed(grid)
-                    break
-            target = grid.filled[self.position[1]][self.position[0]+i]
-            if not target.is_empty():
-                if target.inside.object_type  == "monster":
-                    print("MonsterFound !")
-                    target.inside.killed(grid)
-                    break
         
     def guard(self, monster):
         """Guard one attack comming from a monster"""
         pass
-    
 
- 
+    def score_update(self, score_to_add):
+        """Update the score board"""
+        self.stats.score += score_to_add
+        self.sb.prop_score()
+        self.check_player_high_score()
+        
+    def check_player_high_score(self):
+        """Update the high score"""
+        if self.stats.score > self.stats.high_score:
+            self.stats.high_score = self.stats.score
+            self.sb.prop_high_score()
+        
+
+from random import randrange
 
 class Monster(Actor):
     def __init__(self, grid, name, init_position, image):
         """Init the player character"""
         super().__init__(grid, name, init_position, image)
         self.object_type = "monster"
-        self.order = 1
         self.id
+        self.point_value = 0
+        self.target = "player"
         
-    def move(self, int_direct, grid):
+    def move(self, key, grid):
         """Move the monster"""
-        key = QUARDINAL[int_direct]
         super().move(key, grid)
         grid.filled[self.position[1]][self.position[0]].inside = self
         
-    def killed(self, grid):
+    def hit(self, grid):
+        """Handling of ennemies getting killed + score"""
         grid.filled[self.position[1]][self.position[0]].inside = ""
         grid.monsters.pop(self.id)
+        
+        return self.point_value
+    
+    def monster_queue(self):
+        """Action of monster"""
+        self.action_queue.append(QUARDINAL[randrange(4)])
+        self.action_queue.append("attack")
+        
         
 class Warrior(Monster):
     def __init__(self, grid, id, init_position):
@@ -161,7 +231,7 @@ class Warrior(Monster):
         self.id = id        
         name = f"Warrior: id{self.id}"
         super().__init__(grid, name, init_position, "warrior.png")
-
+        self.point_value = 100
 
 class Archer(Monster):
     def __init__(self, grid, id, init_position):
@@ -169,7 +239,8 @@ class Archer(Monster):
         self.id = id
         name = f"Archer: id{self.id}"
         super().__init__(grid, name, init_position, "archer.png")
-
+        self.point_value = 200
+        
 from pygame.sprite import Sprite
 class Heart(Sprite):
     def __init__(self):
