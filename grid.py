@@ -21,9 +21,10 @@ class Grid():
     def findGridSize(self, settings):
         "Calculate grid size for the game"
         size = []
+        l = [self.x_start, self.y_start]
         for i in range(2):
-            resolution_w_border = settings['resolution'][i]-self.grid_nb [i]*1+1  -self.x_start
-            size.append(int( resolution_w_border / self.grid_nb [i]))
+            resolution_w_border = settings['resolution'][i]-self.grid_nb[i]*1-l[i]
+            size.append(int( resolution_w_border / self.grid_nb[i]))
 
         if size[0]>size[1]: return size[1]
         else: return size[0]

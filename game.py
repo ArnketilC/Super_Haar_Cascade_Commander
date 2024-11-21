@@ -82,7 +82,10 @@ def run():
     while running:
         """Main loop of the game"""
         
-        pygame.time.delay(100) # Small delay 
+        if stats.turn_status == "timer":
+            pygame.time.delay(100) # Small delay 
+        else:
+            pygame.time.delay(10)
     
         screen.fill(settings['screen_color'])
 

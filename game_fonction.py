@@ -79,30 +79,35 @@ def check_event(settings, stats, sb, play_button, count_down, player, grid, TIME
                 if count_down.up_date():
                     stats.turn_status = "player"
                     
-            # GODAMMMM PYTHON 3.9
-            # match stats.turn_status:
-            #     case "player":
-            #             stats.turn_status = player.action(grid)
-            #             stats.turn_status = "monster"
-            #     case "monster":
-            #             for monster in grid.monsters.values():
-            #                 monster.monster_queue()
-            #                 monster.action(grid)
-            #             player.invincibility = False # remove invincibility "frame"
-            #             stats.turn_status = "timer"
-            #     case _:
-            #         pass
-            
-            # match stats.turn_status:
-            if stats.turn_status =="player":
-                        stats.turn_status = player.action(grid)
-                        stats.turn_status = "monster"
-            if stats.turn_status =="monster":
-                        for monster in grid.monsters.values():
-                            monster.monster_queue()
-                            monster.action(grid)
-                        player.invincibility = False # remove invincibility "frame"
-                        stats.turn_status = "timer"
+        # GODAMMMM PYTHON 3.9
+        # match stats.turn_status:
+        #     case "player":
+        #             stats.turn_status = player.action(grid)
+        #             stats.turn_status = "monster"
+        #     case "monster":
+        #             for monster in grid.monsters.values():
+        #                 monster.monster_queue()
+        #                 monster.action(grid)
+        #             player.invincibility = False # remove invincibility "frame"
+        #             stats.turn_status = "timer"
+        #     case _:
+        #         pass
+        
+        # match stats.turn_status:
+        if stats.turn_status =="player":
+            if player.action(grid):
+                stats.turn_status = "monster"
+        if stats.turn_status =="monster":
+            for monster in grid.monsters.values():
+                if len(monster.action_queue) == 0:
+                    monster.monster_queue()
+                monster.action(grid)
+
+            # if finished_monster == len(grid.monsters):
+            player.invincibility = False # remove invincibility "frame"
+            stats.turn_status = "timer"
+            count_down.reset() # Reset the countdown
+                    
 
 
 
@@ -111,7 +116,8 @@ class CountDown:
     def __init__(self, settings, screen) -> None:
         "Init the item"
         self.settings = settings
-        self.value = settings["default_count_down"]
+        self.value_default = settings["default_count_down"]
+        self.value = self.value_default
         
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -125,14 +131,18 @@ class CountDown:
          
     def up_date(self):
         "Update the value"
-        self.value -= 1
+        if self.value > 0:
+            self.value -= 1
         pygame.display.set_caption(f'Countdown: {self.value}')
         if self.value == 0:
             print('Time\'s up!')
-            self.value = self.settings["default_count_down"]
             return 1
         return 0;
-            
+    
+    def reset(self):
+        """Reset the countdown when needed"""
+        self.value = self.settings["default_count_down"]
+                   
     def prop_countdown(self):
         """Prop scorboard text."""
         str_count_down = str(self.value)

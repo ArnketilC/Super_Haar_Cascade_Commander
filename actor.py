@@ -20,7 +20,7 @@ class Entity():
         
         grid.filled[init_position[1]][init_position[0]].inside = self
         self.image = pygame.image.load(path.join(sys.path[0], f"resources/{image}"))
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = pygame.transform.scale(self.image, (grid.size , grid.size ))
         self.rect = self.image.get_rect()
         
     def draw_self(self, screen, grid, x, y):
@@ -148,9 +148,9 @@ class Actor(Entity):
 
     def action(self, grid):
         """Do the queues actions"""
-        while(len(self.action_queue)>0):
-            # print(self.action_queue)
-            self.move(self.action_queue.pop(0), grid)   
+        if len(self.action_queue)<=0: return 1
+        self.move(self.action_queue.pop(0), grid)   
+        return 0
 
 class Player(Actor):
     def __init__(self, grid, stats, sb, name="player"):
@@ -177,6 +177,9 @@ class Player(Actor):
             print("player got hit")
         else :
             print("player dodge the second attack")
+        if self.stats.lives <= 0:
+            self.stats.game_run = False
+            pygame.mouse.set_visible(True)
 
         
     def guard(self, monster):
